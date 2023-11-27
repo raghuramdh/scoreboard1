@@ -53,9 +53,9 @@ function init() {
                         totalCredits += g.scoreCards[s].gameCredit;
                     }
                 }
-                if(totalCredits != 0) {
+                //if(totalCredits != 0) {
                     recalculateCreditsForGame(g);
-                }
+                //}
             }
             $('#container').removeClass('noSession');
             $('#container').addClass('hasSession');
