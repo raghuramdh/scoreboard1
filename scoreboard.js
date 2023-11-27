@@ -23,6 +23,7 @@ $(document).ready(function(){
 function init() {
     var storedApp = localStorage.getItem('app');
     if(storedApp) {
+        localStorage.setItem('appBkp', storedApp);
         app = JSON.parse(storedApp);
         if(app.players) {
             for(var i in app.players) {
@@ -40,6 +41,20 @@ function init() {
             for(var i in app.curSession.games) {
                 if(app.curSession.games[i].status == 'In Progress') {
                     app.curSession.curGame = app.curSession.games[i];
+                }
+                //Hack to fix a bug - can be removed later
+                var g = app.curSession.games[i];
+                var totalCredits = 0;
+                for(s in g.scoreCards) {
+                    if(g.scoreCards[s].active == undefined) {
+                        g.scoreCards[s].active = true;
+                    }
+                    if(g.scoreCards[s].active) {
+                        totalCredits += g.scoreCards[s].gameCredit;
+                    }
+                }
+                if(totalCredits != 0) {
+                    recalculateCreditsForGame(g);
                 }
             }
             $('#container').removeClass('noSession');
@@ -258,6 +273,7 @@ function cloneGame(game) {
 
 function cloneScoreCard(scoreCard) {
     var sc = {
+        'active': scoreCard.active,
         'points': scoreCard.points,
         'bonus': scoreCard.bonus,
         'gameCredit': scoreCard.gameCredit,
@@ -469,14 +485,39 @@ function onKittyCreditsChange() {
     calculateCredit();
 }
 
+function recalculateCreditsForGame(game) {
+    var kittyPoints = 0;
+    for(var i in game.scoreCards) {
+        if(game.scoreCards[i].player.id == 0) {
+            kittyPoints = game.scoreCards[i].gameCredit;
+        }
+    }
+    calculateCreditForGameNoUI(game, kittyPoints);
+}
+
 function calculateCreditForgame(game, isEdit) {
     var kittyPoints = isEdit?Number($('#editGameBoard_credits_0').val()):app.kittyPoints;
+    var cards = game.scoreCards;
+    calculateCreditForGameNoUI(game, kittyPoints);
+    for(var i in cards) {
+        if(i == 0 || !cards[i].active) {
+            continue;
+        }
+        if(isEdit) {
+            $('#editGameBoard_gameCredit_'+cards[i].player.id).text(cards[i].gameCredit);
+        } else {
+            $('#gameBoard_gameCredit_'+cards[i].player.id).text(cards[i].gameCredit);
+        }
+    }
+    saveApp();
+}
+
+function calculateCreditForGameNoUI(game, kittyPoints) {
     var cards = game.scoreCards;
     for(var i in cards) {
         if(i == 0 || !cards[i].active) {
             continue;
         }
-        
         var bcredit = 0;
         var pcredit = 0;
         for(var j in cards) {
@@ -498,13 +539,7 @@ function calculateCreditForgame(game, isEdit) {
         if(cards[i].player.id == game.winner && kittyPoints) {
             cards[i].gameCredit -= kittyPoints
         }
-        if(isEdit) {
-            $('#editGameBoard_gameCredit_'+cards[i].player.id).text(cards[i].gameCredit);
-        } else {
-            $('#gameBoard_gameCredit_'+cards[i].player.id).text(cards[i].gameCredit);
-        }
     }
-    saveApp();
 }
 
 function calculateCredit() {
@@ -576,6 +611,7 @@ function updateGame() {
             app.curSession.gameForEdit = null;
             refreshSessionSummaryOnHome();
             viewCurrentSessionDetails();
+            saveApp();
         }
     } else {
         alert('Incomplete Score');
