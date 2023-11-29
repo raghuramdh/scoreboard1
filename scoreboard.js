@@ -2,6 +2,7 @@ $(document).ready(function(){
     $('#playersSetup_button').click(openPlayersSetup);
     $('#startSession_button').click(startNewSession);
     $('#sessionList_button').click(showSessionList);
+    $('#copyAppData_button').click(copyAppData);
     $('#resetGame_button').click(resetGame);
     $('#nextGame_button').click(nextGame);
     $('#updateGame_button').click(updateGame);
@@ -74,6 +75,10 @@ function init() {
         $('#newPlayer_text').val('Kitty');
         addPlayer();
     }
+}
+
+function copyAppData() {
+    navigator.clipboard.writeText(JSON.stringify(app));
 }
 
 function goToHome() {
@@ -172,7 +177,6 @@ function deletePlayer() {
         $('#scoreCard_'+playerId).remove();
         calculateCredit();
     }
-
     saveApp();
 }
 
