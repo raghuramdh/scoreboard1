@@ -78,7 +78,26 @@ function init() {
 }
 
 function copyAppData() {
-    navigator.clipboard.writeText(JSON.stringify(app));
+    //navigator.clipboard.writeText(JSON.stringify(app));
+
+    var dummy = document.createElement("textarea");
+    document.body.appendChild(dummy);    
+    dummy.value = JSON.stringify(app);  
+    if (navigator.userAgent.match(/ipad|ipod|iphone/i)) {    
+        dummy.contentEditable = true;    
+        dummy.readOnly = true;    
+        var range = document.createRange();    
+        range.selectNodeContents(dummy);    
+        var selection = window.getSelection();    
+        selection.removeAllRanges();    
+        selection.addRange(range);    
+        dummy.setSelectionRange(0, 999999);    
+    } else {
+        dummy.select();
+    }
+    document.execCommand("copy");
+    document.body.removeChild(dummy);
+
 }
 
 function goToHome() {
