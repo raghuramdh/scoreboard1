@@ -2,7 +2,7 @@ $(document).ready(function(){
     $('#playersSetup_button').click(openPlayersSetup);
     $('#startSession_button').click(startNewSession);
     $('#sessionList_button').click(showSessionList);
-    $('#copyAppData_button').click(copyAppData);
+    //$('#copyAppData_button').click(copyAppData);
     $('#resetGame_button').click(resetGame);
     $('#nextGame_button').click(nextGame);
     $('#updateGame_button').click(updateGame);
@@ -679,9 +679,9 @@ function createSessionSummaryTable(session) {
             if(!playerIdNameMap[card.player.id]) {
                 playerIds.push(card.player.id);
                 playerIdNameMap[card.player.id] = card.player.name;
-                playerIdCreditMap[card.player.id] = (game.status=='In Progress'?0:card.gameCredit);
+                playerIdCreditMap[card.player.id] = ((game.status=='In Progress' || !card.active)?0:card.gameCredit);
             } else {
-                playerIdCreditMap[card.player.id] = playerIdCreditMap[card.player.id] + (game.status=='In Progress'?0:card.gameCredit);
+                playerIdCreditMap[card.player.id] = playerIdCreditMap[card.player.id] + ((game.status=='In Progress' || !card.active)?0:card.gameCredit);
             }
         }
     }
